@@ -25,7 +25,7 @@ public class DatabaseConnection {
             statement = connection.createStatement();
 
             // Execute a query
-            String sql = "SELECT * FROM users";
+            String sql = "SELECT * FROM student";
             resultSet = statement.executeQuery(sql);
 
             // Process the result set
