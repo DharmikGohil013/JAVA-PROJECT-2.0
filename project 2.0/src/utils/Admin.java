@@ -55,6 +55,8 @@ public class Admin {
             System.out.println("10. Add University Updates");
             System.out.println("11. Logout");
             System.out.println("12. Exit");
+            System.out.println("13. View All Events");
+            System.out.println("14. Upate show");
 
             int choice = scanner.nextInt();
             switch (choice) {
@@ -109,13 +111,13 @@ public class Admin {
                 }
                 case 9:
                 {
-                    addEvents();
+                    addEvent();
                     continue;
                     
                 }
                 case 10:
                 {
-                    addUniversityUpdates();
+                    addUniversityUpdate();
                     continue;
                     
                 }
@@ -129,10 +131,25 @@ public class Admin {
                     System.out.println("Exiting...");
                     System.exit(0);
                 }
+                case 13:
+                {
+                    viewAllEvents();
+                    continue;
+                    
+                }
+                case 14:
+                {
+                    viewAllUniversityUpdates();
+                    continue;
+                    
+                }
                 default : System.out.println("Invalid choice. Please try again.");
             }
         }
     }
+
+    
+    
 
     private static void viewAllAdminDetails() {
         try (Connection conn = DBConnection.getConnection()) {
@@ -325,47 +342,73 @@ private static void addNewStudent() {
     }
 }
 
-private static void addEvents() {
+private static void addEvent() {
     Scanner scanner = new Scanner(System.in);
+
+    System.out.print("Enter Event Name: ");
+    String eventName = scanner.nextLine();
+
+    System.out.print("Enter Event Date (YYYY-MM-DD): ");
+    String eventDate = scanner.nextLine();
+
     System.out.print("Enter Event Description: ");
     String eventDescription = scanner.nextLine();
 
-    try (Connection conn = DBConnection.getConnection()) {
-        String query = "INSERT INTO events (description) VALUES (?)";
-        PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setString(1, eventDescription);
+    System.out.print("Enter Department (it, ce, cs, cd) or leave blank if not specific: ");
+    String department = scanner.nextLine();
 
+    try (Connection conn = DBConnection.getConnection()) {
+        String query = "INSERT INTO event (event_name, event_date, event_description, department) VALUES (?, ?, ?, ?)";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setString(1, eventName);
+        stmt.setDate(2, java.sql.Date.valueOf(eventDate));
+        stmt.setString(3, eventDescription);
+        stmt.setString(4, department.isEmpty() ? null : department);
+        
         int rowsInserted = stmt.executeUpdate();
         if (rowsInserted > 0) {
-            System.out.println("Event added successfully.");
+            System.out.println("Event added successfully!");
         } else {
-            System.out.println("Error adding event.");
+            System.out.println("Failed to add event.");
         }
+
     } catch (SQLException e) {
         e.printStackTrace();
     }
 }
 
-private static void addUniversityUpdates() {
+
+private static void addUniversityUpdate() {
     Scanner scanner = new Scanner(System.in);
-    System.out.print("Enter University Update Message: ");
-    String updateMessage = scanner.nextLine();
+
+    System.out.print("Enter Update Title: ");
+    String updateTitle = scanner.nextLine();
+
+    System.out.print("Enter Update Content: ");
+    String updateContent = scanner.nextLine();
+
+    System.out.print("Enter Update Date (YYYY-MM-DD): ");
+    String updateDate = scanner.nextLine();
 
     try (Connection conn = DBConnection.getConnection()) {
-        String query = "INSERT INTO university_updates (message) VALUES (?)";
+        String query = "INSERT INTO university_updates (update_title, update_content, update_date) VALUES (?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setString(1, updateMessage);
+        stmt.setString(1, updateTitle);
+        stmt.setString(2, updateContent);
+        stmt.setDate(3, java.sql.Date.valueOf(updateDate));
 
         int rowsInserted = stmt.executeUpdate();
         if (rowsInserted > 0) {
-            System.out.println("University update added successfully.");
+            System.out.println("University update added successfully!");
         } else {
-            System.out.println("Error adding university update.");
+            System.out.println("Failed to add university update.");
         }
+
     } catch (SQLException e) {
         e.printStackTrace();
     }
 }
+
 
 private static void showAllStudentDetailsByBranch() {
     Scanner scanner = new Scanner(System.in);
@@ -483,6 +526,50 @@ private static void showAllFacultyDetailsByBranch() {
         e.printStackTrace();
     }
 }
+private static void viewAllEvents() {
+    try (Connection conn = DBConnection.getConnection()) {
+        String query = "SELECT * FROM event";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
 
+        System.out.println("Event ID | Event Name | Event Date | Description | Department");
+        System.out.println("---------------------------------------------------------------");
+
+        while (rs.next()) {
+            int eventId = rs.getInt("event_id");
+            String eventName = rs.getString("event_name");
+            java.sql.Date eventDate = rs.getDate("event_date");  // Use java.sql.Date to match SQL date format
+            String eventDescription = rs.getString("event_description");
+            String department = rs.getString("department");
+
+            System.out.println(eventId + " | " + eventName + " | " + eventDate + " | " + eventDescription + " | " + (department == null ? "All" : department));
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+private static void viewAllUniversityUpdates() {
+    try (Connection conn = DBConnection.getConnection()) {
+        String query = "SELECT * FROM university_updates";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
+
+        System.out.println("Update ID | Title | Date | Content");
+        System.out.println("---------------------------------------------------------------");
+
+        while (rs.next()) {
+            int updateId = rs.getInt("update_id");
+            String updateTitle = rs.getString("update_title");
+            java.sql.Date updateDate = rs.getDate("update_date");
+            String updateContent = rs.getString("update_content");
+
+            System.out.println(updateId + " | " + updateTitle + " | " + updateDate + " | " + updateContent);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
     // Add methods for other admin functionalities...
 }

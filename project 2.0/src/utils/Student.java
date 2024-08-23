@@ -70,12 +70,18 @@ public class Student
                 switch (choice) 
                 {
                     case 1 : viewProfile(email);continue;
-                    case 2 : viewAttendance(email);continue;
+                    case 2 : 
+                    {
+                        System.out.print("Enter your email to view attendance: ");
+                        String studentEmail = scanner.nextLine();
+                        viewAttendanceForStudent(studentEmail);
+                        continue;
+                    }
                     case 3 : showFees();continue;
                     case 4 : viewResult(email);continue;
                     case 5 : viewClassUpdates(email);continue;
                     case 6 : viewMaterialLinks();continue;
-                    case 7 : viewEvents();continue;
+                    case 7 : viewAllEvents();continue;
                     case 8 : crMenu(email);continue;
 
                     case 9 : {
@@ -123,26 +129,39 @@ public class Student
             }
         }
     
-        private static void viewAttendance(String email) 
-        {
-            try (Connection conn = DBConnection.getConnection()) 
-            {
-                String query = "SELECT * FROM attendance WHERE student_email = ?";
+        public static void viewAttendanceForStudent(String studentEmail) {
+            try (Connection conn = DBConnection.getConnection()) {
+                // SQL query to fetch attendance records for the given student email
+                String query = "SELECT attendance_date, status FROM attendance WHERE student_email = ?";
                 PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, email);
+                stmt.setString(1, studentEmail);
+    
+                // Execute query
                 ResultSet rs = stmt.executeQuery();
     
-                while (rs.next()) 
-                {
-                    System.out.println("Date: " + rs.getString("date"));
-                    System.out.println("Status: " + (rs.getInt("status") == 1 ? "Present" : "Absent"));
-                    System.out.println("------------------------");
+                // Display the attendance records
+                System.out.println("Attendance Records for " + studentEmail + ":");
+                System.out.println("Date       | Status");
+                System.out.println("--------------------");
+    
+                boolean hasRecords = false;
+                while (rs.next()) {
+                    java.sql.Date attendanceDate = rs.getDate("attendance_date");
+                    String status = rs.getString("status");
+    
+                    System.out.println(attendanceDate + " | " + status);
+                    hasRecords = true;
                 }
-            } catch (SQLException e) 
-            {
+    
+                if (!hasRecords) {
+                    System.out.println("No attendance records found for this student.");
+                }
+    
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+        
     
         private static void showFees() 
         {
@@ -217,25 +236,30 @@ public class Student
             }
         }
     
-        private static void viewEvents() 
-        {
-            try (Connection conn = DBConnection.getConnection()) 
-            {
-                String query = "SELECT * FROM events";
+        private static void viewAllEvents() {
+            try (Connection conn = DBConnection.getConnection()) {
+                String query = "SELECT * FROM event";
                 PreparedStatement stmt = conn.prepareStatement(query);
                 ResultSet rs = stmt.executeQuery();
-    
-                while (rs.next()) 
-                {
-                    System.out.println("Event ID: " + rs.getInt("id"));
-                    System.out.println("Description: " + rs.getString("description"));
-                    System.out.println("------------------------");
+        
+                System.out.println("Event ID | Event Name | Event Date | Description | Department");
+                System.out.println("---------------------------------------------------------------");
+        
+                while (rs.next()) {
+                    int eventId = rs.getInt("event_id");
+                    String eventName = rs.getString("event_name");
+                    Date eventDate = rs.getDate("event_date");
+                    String eventDescription = rs.getString("event_description");
+                    String department = rs.getString("department");
+        
+                    System.out.println(eventId + " | " + eventName + " | " + eventDate + " | " + eventDescription + " | " + (department == null ? "All" : department));
                 }
-            } catch (SQLException e) 
-            {
+        
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+        
     
         private static void crMenu(String email) 
         {

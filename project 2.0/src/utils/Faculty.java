@@ -52,6 +52,7 @@ public class Faculty {
             System.out.println("8. Logout");
             System.out.println("9. Exit");
             System.out.println("10. View Events");
+            System.out.println("11. View Upadets");
             System.out.print("Choose an option: ");
 
             int choice = scanner.nextInt();
@@ -62,12 +63,17 @@ public class Faculty {
                     viewProfile(email);
                     
                 }
-                case 2 : showSalary();
-                case 3 : showAllStudentDetails();
-                case 4 : manageAttendance();
-                case 5 : showAttendanceForStudent();
-                case 6 : addMaterialLink();
-                case 7 : sendPersonalMessage();
+                case 2 : showSalary();continue;
+                case 3 : showAllStudentDetails();continue;
+                case 4 : markAttendanceByEmail();continue;
+                case 5 : {
+                    System.out.print("Enter your email to view attendance: ");
+    String studentEmail = scanner.nextLine();
+    viewAttendanceForStudent(studentEmail);
+    continue;
+                }
+                case 6 : addMaterialLink();continue;
+                case 7 : sendPersonalMessage();continue;
                 case 8 : {
                     System.out.println("Logging out...");
                     return;
@@ -76,7 +82,8 @@ public class Faculty {
                     System.out.println("Exiting program...");
                     System.exit(0);
                 }
-                case 10 : viewEvents();
+                case 10 : viewAllEvents();continue;
+                case 11 : viewAllUniversityUpdates();continue;
                 default : System.out.println("Invalid option. Try again.");
             }
         }
@@ -129,49 +136,67 @@ public class Faculty {
         }
     }
 
-    private static void manageAttendance() {
+    private static void markAttendanceByEmail() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter Student Email to Mark Attendance: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter Date (YYYY-MM-DD): ");
-        String date = scanner.nextLine();
-        System.out.print("Enter Attendance Status (1 for Present, 0 for Absent): ");
-        int status = scanner.nextInt();
-
+    
+        System.out.print("Enter Student Email: ");
+        String studentEmail = scanner.nextLine();
+    
+        System.out.print("Enter Attendance Date (YYYY-MM-DD): ");
+        String attendanceDate = scanner.nextLine();
+    
+        System.out.print("Enter Attendance Status (Present/Absent): ");
+        String status = scanner.nextLine();
+    
         try (Connection conn = DBConnection.getConnection()) {
-            String query = "INSERT INTO attendance (student_email, date, status) VALUES (?, ?, ?)";
+            String query = "INSERT INTO attendance (student_email, attendance_date, status) VALUES (?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, email);
-            stmt.setString(2, date);
-            stmt.setInt(3, status);
-
+            stmt.setString(1, studentEmail);
+            stmt.setDate(2, java.sql.Date.valueOf(attendanceDate));
+            stmt.setString(3, status);
+    
             int rowsInserted = stmt.executeUpdate();
             if (rowsInserted > 0) {
-                System.out.println("Attendance marked successfully.");
+                System.out.println("Attendance marked successfully!");
             } else {
-                System.out.println("Error marking attendance.");
+                System.out.println("Failed to mark attendance.");
             }
+    
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+    
+    
 
-    private static void showAttendanceForStudent() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter Student Email to View Attendance: ");
-        String email = scanner.nextLine();
-
+    public static void viewAttendanceForStudent(String studentEmail) {
         try (Connection conn = DBConnection.getConnection()) {
-            String query = "SELECT * FROM attendance WHERE student_email = ?";
+            // SQL query to fetch attendance records for the given student email
+            String query = "SELECT attendance_date, status FROM attendance WHERE student_email = ?";
             PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, email);
+            stmt.setString(1, studentEmail);
+
+            // Execute query
             ResultSet rs = stmt.executeQuery();
 
+            // Display the attendance records
+            System.out.println("Attendance Records for " + studentEmail + ":");
+            System.out.println("Date       | Status");
+            System.out.println("--------------------");
+
+            boolean hasRecords = false;
             while (rs.next()) {
-                System.out.println("Date: " + rs.getString("date"));
-                System.out.println("Status: " + (rs.getInt("status") == 1 ? "Present" : "Absent"));
-                System.out.println("------------------------");
+                java.sql.Date attendanceDate = rs.getDate("attendance_date");
+                String status = rs.getString("status");
+
+                System.out.println(attendanceDate + " | " + status);
+                hasRecords = true;
             }
+
+            if (!hasRecords) {
+                System.out.println("No attendance records found for this student.");
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -237,4 +262,50 @@ public class Faculty {
             e.printStackTrace();
         }
     }
+    private static void viewAllEvents() {
+        try (Connection conn = DBConnection.getConnection()) {
+            String query = "SELECT * FROM event";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+    
+            System.out.println("Event ID | Event Name | Event Date | Description | Department");
+            System.out.println("---------------------------------------------------------------");
+    
+            while (rs.next()) {
+                int eventId = rs.getInt("event_id");
+                String eventName = rs.getString("event_name");
+                java.sql.Date eventDate = rs.getDate("event_date");  // Use java.sql.Date to match SQL date format
+                String eventDescription = rs.getString("event_description");
+                String department = rs.getString("department");
+    
+                System.out.println(eventId + " | " + eventName + " | " + eventDate + " | " + eventDescription + " | " + (department == null ? "All" : department));
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private static void viewAllUniversityUpdates() {
+        try (Connection conn = DBConnection.getConnection()) {
+            String query = "SELECT * FROM university_updates";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+    
+            System.out.println("Update ID | Title | Date | Content");
+            System.out.println("---------------------------------------------------------------");
+    
+            while (rs.next()) {
+                int updateId = rs.getInt("update_id");
+                String updateTitle = rs.getString("update_title");
+                java.sql.Date updateDate = rs.getDate("update_date");
+                String updateContent = rs.getString("update_content");
+    
+                System.out.println(updateId + " | " + updateTitle + " | " + updateDate + " | " + updateContent);
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }
