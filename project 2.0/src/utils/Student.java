@@ -78,9 +78,27 @@ public class Student
                         continue;
                     }
                     case 3 : showFees();continue;
-                    case 4 : viewResult(email);continue;
-                    case 5 : viewClassUpdates(email);continue;
-                    case 6 : viewMaterialLinks();continue;
+                    case 4 : 
+                    {
+                        System.out.print("Enter your email to view results: ");
+                        String studentEmail = scanner.nextLine();
+                        ResultViewer.viewResults(studentEmail);
+                        continue;
+                    }
+                    case 5 : 
+                    {
+                        System.out.print("Enter Class Name (IT, CE, CS, CD) to view updates: ");
+                        String className = scanner.nextLine().toUpperCase();
+                        ClassUpdateViewer.viewClassUpdates(className);
+                        continue;
+                    }
+                    case 6 : 
+                    {
+                        System.out.print("Enter your class name (IT, CE, CS, CD) to view materials: ");
+    String className = scanner.nextLine().toUpperCase();
+    MaterialViewer.viewMaterials(className);
+    continue;
+                    }
                     case 7 : viewAllEvents();continue;
                     case 8 : crMenu(email);continue;
 
@@ -285,8 +303,12 @@ public class Student
                 scanner.nextLine();  // Consume newline
     
                 switch (choice) {
-                    case 1 : addClassUpdate(email);
-                    case 2 : addMaterialLink();
+                    case 1 : 
+                    {
+                        ClassUpdateManager.addClassUpdate();
+                        continue;
+                    }
+                    case 2 : MaterialManager.addMaterial();continue;
                     case 3 : {
                         System.out.println("Logging out...");
                         return;

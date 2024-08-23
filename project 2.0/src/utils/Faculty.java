@@ -53,6 +53,7 @@ public class Faculty {
             System.out.println("9. Exit");
             System.out.println("10. View Events");
             System.out.println("11. View Upadets");
+            System.out.println("12. Add Result With Same");
             System.out.print("Choose an option: ");
 
             int choice = scanner.nextInt();
@@ -72,7 +73,7 @@ public class Faculty {
     viewAttendanceForStudent(studentEmail);
     continue;
                 }
-                case 6 : addMaterialLink();continue;
+                case 6 : MaterialManager.addMaterial();continue;
                 case 7 : sendPersonalMessage();continue;
                 case 8 : {
                     System.out.println("Logging out...");
@@ -84,6 +85,11 @@ public class Faculty {
                 }
                 case 10 : viewAllEvents();continue;
                 case 11 : viewAllUniversityUpdates();continue;
+                case 12 : 
+                {
+                    ResultManager.addResult();
+                    continue;
+                }
                 default : System.out.println("Invalid option. Try again.");
             }
         }
