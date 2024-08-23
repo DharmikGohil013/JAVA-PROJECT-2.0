@@ -74,7 +74,7 @@ public class Faculty {
     continue;
                 }
                 case 6 : MaterialManager.addMaterial();continue;
-                case 7 : sendPersonalMessage();continue;
+                case 7 :  MessageManager.sendMessage();continue;
                 case 8 : {
                     System.out.println("Logging out...");
                     return;

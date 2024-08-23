@@ -59,9 +59,11 @@ public class Student
                 System.out.println("5. Class Updates");
                 System.out.println("6. Material Links");
                 System.out.println("7. View Events");
+                System.out.println("11. Univercity Upatde ");
                 System.out.println("8. CR Menu");
                 System.out.println("9. Logout");
                 System.out.println("10. Exit");
+                System.out.println("12. Sir Sms");
                 System.out.print("Choose an option: ");
     
                 int choice = scanner.nextInt();
@@ -109,6 +111,14 @@ public class Student
                     case 10 : {
                         System.out.println("Exiting program...");
                         System.exit(0);
+                    }
+                    case 11 : {
+                        viewAllUniversityUpdates();
+                        continue;
+                    }
+                    case 12 : {
+                        PersonalMessageViewer.viewPersonalMessages(email);
+                        continue;
                     }
                     default : System.out.println("Invalid option. Try again.");
                 }
@@ -389,6 +399,28 @@ public class Student
                 {
                     System.out.println("Error adding material link.");
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        private static void viewAllUniversityUpdates() {
+            try (Connection conn = DBConnection.getConnection()) {
+                String query = "SELECT * FROM university_updates";
+                PreparedStatement stmt = conn.prepareStatement(query);
+                ResultSet rs = stmt.executeQuery();
+        
+                System.out.println("Update ID | Title | Date | Content");
+                System.out.println("---------------------------------------------------------------");
+        
+                while (rs.next()) {
+                    int updateId = rs.getInt("update_id");
+                    String updateTitle = rs.getString("update_title");
+                    java.sql.Date updateDate = rs.getDate("update_date");
+                    String updateContent = rs.getString("update_content");
+        
+                    System.out.println(updateId + " | " + updateTitle + " | " + updateDate + " | " + updateContent);
+                }
+        
             } catch (SQLException e) {
                 e.printStackTrace();
             }

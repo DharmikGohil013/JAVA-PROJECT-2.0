@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 public class Admin {
 
+    
     public static void login() {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Admin Email: ");
