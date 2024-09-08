@@ -63,7 +63,7 @@ public class Student
                 System.out.println("8. CR Menu");
                 System.out.println("9. Logout");
                 System.out.println("10. Exit");
-                System.out.println("12. Sir Sms");
+                System.out.println("12.     ");
                 System.out.print("Choose an option: ");
     
                 int choice = scanner.nextInt();
